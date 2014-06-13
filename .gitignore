@@ -52,3 +52,9 @@ coverage.xml
 # Sphinx documentation
 docs/_build/
 
+# IntelliJ Idea
+.idea/
+
+# Parsed data
+data/
+.DS_Store
