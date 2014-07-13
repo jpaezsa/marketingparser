@@ -3,7 +3,8 @@
 
 import datetime
 import unittest
-from website import PostInfo, DigitalBuzz, CreativeGuerrilla, CreativeCriminals
+from marketingparser.website import PostInfo, DigitalBuzz, CreativeGuerrilla, CreativeCriminals, \
+                                    ViralBlog, ImprovEverywhere, OnTheGroundLookingUp
 
 
 class WebsiteTestCase(unittest.TestCase):
@@ -60,6 +61,36 @@ class WebsiteTestCase(unittest.TestCase):
         self.assertGreater(website.get_fb_count(), 0)
         self.assertTrue(website.get_text().startswith('Team News, has taken a humorous approach'))
         self.assertTrue(website.get_comments().startswith('Reminds me of the Top Magazine'))
+
+    def test_viralblog(self):
+        website = ViralBlog()
+        self.assertEqual(len(website.load_page(0)), 12)
+        self.assertTrue(website.load_post('http://www.viralblog.com/user-created-content/the-best-fan-made-game-of-thrones-credits/'))
+        self.assertEqual(website.get_date(), datetime.date(2014, 6, 24))
+        self.assertEqual(website.get_title(), 'The Best Fan-Made Game Of Thrones Credits')
+        self.assertEqual(website.get_author(), 'Marion aan \'t Goor')
+        self.assertEqual(website.get_category(), 'User Created Content')
+        self.assertTrue(website.get_text().startswith('We all know Game of Thrones has'))
+
+    def test_improveverywhere(self):
+        website = ImprovEverywhere()
+        self.assertEqual(len(website.load_page(0)), 5)
+        self.assertTrue(website.load_post('http://improveverywhere.com/2014/04/01/spider-man-in-real-life/'))
+        self.assertEqual(website.get_date(), datetime.date(2014, 4, 1))
+        self.assertEqual(website.get_title(), 'Spider-Man In Real Life')
+        self.assertEqual(website.get_author(), 'Charlie')
+        self.assertEqual(website.get_category(), '')
+        self.assertGreater(website.get_text().find('For our latest mission, we brought Spider-Man'), 0)
+
+    def test_onthegroundlookingup(self):
+        website = OnTheGroundLookingUp()
+        self.assertEqual(len(website.load_page(0)), 10)
+        self.assertTrue(website.load_post('http://www.onthegroundlookingup.com/2013/01/tbs-goes-tear-off-for-new-nerd-show.html'))
+        self.assertEqual(website.get_date(), datetime.date(2013, 1, 24))
+        self.assertEqual(website.get_title(), 'TBS Goes Tear Off For New Nerd Show')
+        self.assertEqual(website.get_author(), 'Sam Ewen')
+        self.assertEqual(website.get_category(), 'Advertising, Games, Guerrilla, Television')
+        self.assertTrue(website.get_text().startswith('I am always a fan of the Tear-Off campaign'))
 
 
 if __name__ == '__main__':

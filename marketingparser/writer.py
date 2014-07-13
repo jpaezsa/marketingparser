@@ -2,9 +2,11 @@
 
 import codecs
 import logging
+import os
 import os.path
 
 SEP = '|'
+# SEP = u'⌑'
 BASE_DIR = 'data'
 ENCODING = 'utf-8'
 
@@ -53,6 +55,8 @@ class CSVWriter(Writer):
 
     def __init__(self, website):
         Writer.__init__(self, website)
+        if not os.path.exists(BASE_DIR):
+            os.mkdir(BASE_DIR)
 
     def save(self, post):
         self.page.append(post)

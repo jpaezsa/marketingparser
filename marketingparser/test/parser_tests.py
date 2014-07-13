@@ -3,8 +3,8 @@
 
 import unittest
 from parser import parse
-from website import CreativeGuerrilla, CreativeCriminals
-from writer import MemoryWriter
+from marketingparser.website import CreativeGuerrilla, CreativeCriminals
+from marketingparser.writer import MemoryWriter
 
 
 class ParserTestCase(unittest.TestCase):

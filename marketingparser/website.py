@@ -215,14 +215,6 @@ class DigitalBuzz(Website):
         count = self.comments.find(class_='social-wordpress')
         return DIGITS_ONLY.search(count.span.text).group(0).strip() if count else '0'
 
-    # def get_tweet_count(self):
-    #     count = self.comments.find(class_='social-twitter')
-    #     return DIGITS_ONLY.search(count.span.text).group(0).strip() if count else '0'
-    #
-    # def get_fb_count(self):
-    #     count = self.comments.find(class_='social-facebook')
-    #     return DIGITS_ONLY.search(count.span.text).group(0).strip() if count else '0'
-
     def get_text(self):
         containers = self.post.find(class_='entry').find_all('p')
         paragraphs = [c.text.strip() or '' for c in containers]
@@ -379,3 +371,166 @@ class CreativeCriminals(Website):
         containers = self.post.find_all(class_='comment_div')
         comments = [c.find(class_='comment_text').text.strip() for c in containers]
         return ' '.join([LINE_BREAK.sub(' ', c) for c in comments]).strip()
+
+
+class ViralBlog(Website):
+
+    DATE = re.compile(r'[\d/]+')
+
+    def __init__(self):
+        self.url = 'http://www.viralblog.com/'
+        self.filename = 'viralblog.csv'
+        self.posts_per_page = 12
+        self.soup = None
+        self.post = None
+        self.comments = None
+
+    def parse_date(self, str_date):
+        date_match = ViralBlog.DATE.search(str_date)
+        if date_match:
+            return datetime.datetime.strptime(date_match.group(0), '%d/%m/%Y').date()
+        else:
+            return None
+
+    def get_page_url(self, page_num):
+        return self.url if page_num == 0 else \
+            '%s/page/%d' % (self.url, page_num + 1)
+
+    def load_page(self, post_from):
+        page_num = post_from / self.posts_per_page
+        from_index = post_from % self.posts_per_page
+        url = self.get_page_url(page_num)
+        soup = BeautifulSoup(urlopen(url))
+        thumbs = soup.find_all(class_='item-list-small')
+        links = [thumb.find('a') for thumb in thumbs]
+        return [l['href'] for l in links][from_index:]
+
+    def load_post(self, url):
+        self.post_url = url
+        self.soup = BeautifulSoup(urlopen(url))
+        self.post = self.soup.find(id='single-post')
+        self.pre_post = self.post.find(class_='pre-post')
+        return True if self.post else False
+
+    def get_title(self):
+        return self.post.find('h1').text.strip()
+
+    def get_date(self):
+        return self.parse_date(
+            self.pre_post.find(class_='date').text.strip()
+        )
+
+    def get_author(self):
+        return self.pre_post.find(class_='author').a.span.text.strip()
+
+    def get_category(self):
+        return self.pre_post.find(class_='category').a.span.text.strip()
+
+    def get_text(self):
+        containers = self.post.find(class_='post-all').find_all(['p', 'h2', 'h3'])
+        paragraphs = [c.text.strip() or '' for c in containers]
+        return ' '.join([LINE_BREAK.sub('', p) for p in paragraphs]).strip()
+
+
+class ImprovEverywhere(Website):
+
+    def __init__(self):
+        self.url = 'http://improveverywhere.com/'
+        self.filename = 'improveverywhere.csv'
+        self.posts_per_page = 5
+        self.soup = None
+        self.post = None
+        self.comments = None
+
+    def parse_date(self, str_date):
+        return datetime.datetime.strptime(str_date, '%B %d, %Y').date()
+
+    def get_page_url(self, page_num):
+        return self.url if page_num == 0 else \
+            '%s/page/%d' % (self.url, page_num + 1)
+
+    def load_page(self, post_from):
+        page_num = post_from / self.posts_per_page
+        from_index = post_from % self.posts_per_page
+        url = self.get_page_url(page_num)
+        soup = BeautifulSoup(urlopen(url))
+        thumbs = soup.find_all('h2', class_='entry-title')
+        links = [thumb.find('a') for thumb in thumbs]
+        return [l['href'] for l in links][from_index:]
+
+    def load_post(self, url):
+        self.post_url = url
+        self.soup = BeautifulSoup(urlopen(url))
+        self.post = self.soup.find(class_='type-post')
+        self.meta = self.soup.find(class_='entry-meta')
+        return True if self.post else False
+
+    def get_title(self):
+        return self.post.find('h1', class_='entry-title').text.strip()
+
+    def get_date(self):
+        return self.parse_date(
+            self.meta.find(class_='entry-date').text.strip()
+        )
+
+    def get_author(self):
+        return self.meta.find(class_='author').a.text.strip()
+
+    def get_text(self):
+        containers = self.post.find(class_='entry-content').find_all(['p', 'h2', 'h3'])
+        paragraphs = [c.text.strip() or '' for c in containers]
+        return ' '.join([LINE_BREAK.sub('', p) for p in paragraphs]).strip()
+
+
+class OnTheGroundLookingUp(Website):
+
+    def __init__(self):
+        self.url = 'http://www.onthegroundlookingup.com/'
+        self.filename = 'onthegroundlookingup.csv'
+        self.posts_per_page = 10
+        self.soup = None
+        self.post = None
+        self.comments = None
+
+    def parse_date(self, str_date):
+        return datetime.datetime.strptime(str_date, '%d %B %Y').date()
+
+    def get_page_url(self, page_num):
+        return self.url if page_num == 0 else \
+            '%s/page/%d' % (self.url, page_num + 1)
+
+    def load_page(self, post_from):
+        page_num = post_from / self.posts_per_page
+        from_index = post_from % self.posts_per_page
+        url = self.get_page_url(page_num)
+        soup = BeautifulSoup(urlopen(url))
+        thumbs = soup.find_all('h3', class_='entry-header')
+        links = [thumb.find('a') for thumb in thumbs]
+        return [l['href'] for l in links][from_index:]
+
+    def load_post(self, url):
+        self.post_url = url
+        self.soup = BeautifulSoup(urlopen(url))
+        self.post = self.soup.find(id='alpha-inner')
+        return True if self.post else False
+
+    def get_title(self):
+        return self.post.find('h3', class_='entry-header').text.strip()
+
+    def get_date(self):
+        return self.parse_date(
+            self.post.find('h2', class_='date-header').text.strip()
+        )
+
+    def get_author(self):
+        return 'Sam Ewen'
+
+    def get_category(self):
+        footer = self.post.find(class_='post-footers')
+        cats = [cat.text.strip() for cat in footer.find_all('a')] if footer else []
+        return ', '.join(cats) if cats else ''
+
+    def get_text(self):
+        containers = self.post.find(class_='entry-body').find_all(['p', 'h2', 'h3'])
+        paragraphs = [c.text.strip() or '' for c in containers]
+        return ' '.join([LINE_BREAK.sub('', p) for p in paragraphs]).strip()

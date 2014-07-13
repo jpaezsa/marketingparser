@@ -3,13 +3,17 @@
 
 import argparse
 import logging
-from website import PostInfo, DigitalBuzz, CreativeGuerrilla, CreativeCriminals
-from writer import CSVWriter
+from marketingparser.website import PostInfo, DigitalBuzz, CreativeGuerrilla, CreativeCriminals, \
+                                    ViralBlog, ImprovEverywhere, OnTheGroundLookingUp
+from marketingparser.writer import CSVWriter
 
 WEBSITES = {
     'digitalbuzzblog': DigitalBuzz(),
     'creativeguerrillamarketing': CreativeGuerrilla(),
-    'creativecriminals': CreativeCriminals()
+    'creativecriminals': CreativeCriminals(),
+    'viralblog': ViralBlog(),
+    'improveverywhere': ImprovEverywhere(),
+    'onthegroundlookingup': OnTheGroundLookingUp()
 }
 
 logging.basicConfig(level=logging.INFO)
@@ -72,7 +76,7 @@ def parse(website, writer, post_from=0, post_count=None):
     feed.load(post_from)
     for post in feed:
         writer.save(post)
-        logger.debug('Processed %d of %d posts' % (writer.post_count, post_count))
+        logger.debug('Processed %d of %s posts' % (writer.post_count, post_count or 'all'))
         if post_count and writer.post_count == post_count:
             break
     writer.flush()
