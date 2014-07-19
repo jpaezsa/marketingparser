@@ -1,11 +1,16 @@
 Marketing websites parser
 ===============
 
-This is a parser for 3 marketing websites:
+This is a parser for several marketing websites:
 
 - digitalbuzzblog.com
 - creativeguerrillamarketing.com
 - creativecriminals.com
+- viralblog.com
+- improveverywhere.com
+- onthegroundlookingup.com
+- 1000heads.com
+- blog.guerrillacomm.com
 
 Parses all blog posts to a CSV file. Each record represents one blog post and has the following structure:
 
