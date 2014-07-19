@@ -4,7 +4,8 @@
 import argparse
 import logging
 from marketingparser.website import PostInfo, DigitalBuzz, CreativeGuerrilla, CreativeCriminals, \
-                                    ViralBlog, ImprovEverywhere, OnTheGroundLookingUp
+                                    ViralBlog, ImprovEverywhere, OnTheGroundLookingUp, ThousandHeads, \
+                                    GuerrillaComm
 from marketingparser.writer import CSVWriter
 
 WEBSITES = {
@@ -13,7 +14,9 @@ WEBSITES = {
     'creativecriminals': CreativeCriminals(),
     'viralblog': ViralBlog(),
     'improveverywhere': ImprovEverywhere(),
-    'onthegroundlookingup': OnTheGroundLookingUp()
+    'onthegroundlookingup': OnTheGroundLookingUp(),
+    '1000heads': ThousandHeads(),
+    'guerrillacomm': GuerrillaComm()
 }
 
 logging.basicConfig(level=logging.INFO)

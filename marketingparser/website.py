@@ -534,3 +534,112 @@ class OnTheGroundLookingUp(Website):
         containers = self.post.find(class_='entry-body').find_all(['p', 'h2', 'h3'])
         paragraphs = [c.text.strip() or '' for c in containers]
         return ' '.join([LINE_BREAK.sub('', p) for p in paragraphs]).strip()
+
+
+class ThousandHeads(Website):
+
+    BLOG_LINK = re.compile('^http://1000heads.com/\d{4}/')
+
+    def __init__(self):
+        self.url = 'http://1000heads.com'
+        self.filename = '1000heads.csv'
+        self.posts_per_page = 10
+        self.soup = None
+        self.post = None
+
+    def parse_date(self, str_date):
+        return datetime.datetime.strptime(str_date, '%d %B %Y').date()
+
+    def get_page_url(self, page_num):
+        return '%s/sitemap.xml' % self.url if page_num == 0 \
+            else '%s/404' % self.url
+
+    def load_page(self, post_from):
+        url = self.get_page_url(0)
+        soup = BeautifulSoup(urlopen(url))
+        locs = soup.find_all('loc')
+        links = []
+        for l in locs[post_from:]:
+            # skip static pages
+            if ThousandHeads.BLOG_LINK.match(l.text):
+                links.append(l.text)
+        return links
+
+    def load_post(self, url):
+        self.post_url = url
+        self.soup = BeautifulSoup(urlopen(url))
+        self.post = self.soup.find(class_='type-post')
+        self.meta = self.post.find(class_='blog-meta') if self.post else None
+        return True if self.post else False
+
+    def get_title(self):
+        return self.meta.h2.a.text.strip()
+
+    def get_date(self):
+        author_and_date = self.meta.find_all('i')
+        return self.parse_date(author_and_date[1].text.strip()) if author_and_date else ''
+
+    def get_author(self):
+        author_and_date = self.meta.find_all('i')
+        return author_and_date[0].text.strip() if author_and_date else ''
+
+    def get_text(self):
+        containers = self.post.find_all('p', recursive=False)
+        paragraphs = [c.text.strip() or '' for c in containers]
+        return ' '.join([LINE_BREAK.sub(' ', p) for p in paragraphs]).strip()
+
+
+class GuerrillaComm(Website):
+
+    BLOG_LINK = re.compile('^http://blog.guerrillacomm.com/\d{4}/.+html$')
+
+    def __init__(self):
+        self.url = 'http://blog.guerrillacomm.com'
+        self.filename = 'guerrillacomm.csv'
+        self.posts_per_page = 10
+        self.soup = None
+        self.post = None
+        self.next_url = '%s/search?updated-max=2015-01-01T00:00:00-04:00&max-results=10' % self.url
+
+    def parse_date(self, str_date):
+        return datetime.datetime.strptime(str_date, '%B %d, %Y').date()
+
+    def get_page_url(self, page_num):
+        return self.next_url
+
+    def load_page(self, post_from):
+        page_num = post_from / self.posts_per_page
+        from_index = post_from % self.posts_per_page
+        url = self.get_page_url(page_num)
+        soup = BeautifulSoup(urlopen(url))
+        next_url_container = soup.find(id='blog-pager-older-link')
+        self.next_url = next_url_container.a['href'] if next_url_container else '%s/404' % self.url
+        thumbs = soup.find_all('h3', class_='post-title')
+        links = [thumb.find('a') for thumb in thumbs]
+        return [l['href'] for l in links][from_index:]
+
+    def load_post(self, url):
+        self.post_url = url
+        self.soup = BeautifulSoup(urlopen(url))
+        self.post = self.soup.find(class_='blog-posts')
+        return True if self.post else False
+
+    def get_title(self):
+        return self.post.find('h3', class_='post-title').text.strip()
+
+    def get_date(self):
+        date = self.post.find('h2', class_='date-header')
+        return self.parse_date(date.text.strip()) if date else ''
+
+    def get_author(self):
+        author = self.post.find(class_='post-author')
+        return author.find('span', itemprop='name').text.strip() if author else ''
+
+    def get_category(self):
+        cat_container = self.post.find(class_='post-labels')
+        cats = [cat.text.strip() for cat in cat_container.find_all('a')] if cat_container else []
+        return ', '.join(cats) if cats else ''
+
+    def get_text(self):
+        body = self.post.find(class_='post-body')
+        return LINE_BREAK.sub(' ', body.text.strip()) if body else '' 

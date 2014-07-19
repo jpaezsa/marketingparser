@@ -4,7 +4,8 @@
 import datetime
 import unittest
 from marketingparser.website import PostInfo, DigitalBuzz, CreativeGuerrilla, CreativeCriminals, \
-                                    ViralBlog, ImprovEverywhere, OnTheGroundLookingUp
+                                    ViralBlog, ImprovEverywhere, OnTheGroundLookingUp, ThousandHeads, \
+                                    GuerrillaComm
 
 
 class WebsiteTestCase(unittest.TestCase):
@@ -92,6 +93,24 @@ class WebsiteTestCase(unittest.TestCase):
         self.assertEqual(website.get_category(), 'Advertising, Games, Guerrilla, Television')
         self.assertTrue(website.get_text().startswith('I am always a fan of the Tear-Off campaign'))
 
+    def test_1000heads(self):
+        website = ThousandHeads()
+        self.assertGreater(len(website.load_page(0)), 100)
+        self.assertTrue(website.load_post('http://1000heads.com/2014/06/the-week-in-social-youtube-tip-jar-mars-selfie-and-bbc-on-reddit/'))
+        self.assertEqual(website.get_date(), datetime.date(2014, 6, 29))
+        self.assertEqual(website.get_title(), 'The week in social: YouTube tip jar, Mars selfie, and BBC on Reddit')
+        self.assertEqual(website.get_author(), 'Kevin Barnes')
+        self.assertTrue(website.get_text().startswith('Lenovo patents its version of Google Glass'))
+
+    def test_guerrillacomm(self):
+        website = GuerrillaComm()
+        self.assertEqual(len(website.load_page(0)), 10)
+        self.assertTrue(website.load_post('http://blog.guerrillacomm.com/2013/12/bad-timing.html'))
+        self.assertEqual(website.get_date(), datetime.date(2013, 12, 16))
+        self.assertEqual(website.get_title(), 'Bad timing')
+        self.assertEqual(website.get_author(), 'Guerrilla Communication')
+        self.assertEqual(website.get_category(), 'advertising, cinesite, digital, mock')
+        self.assertTrue(website.get_text().startswith('Timing is an important part of our daily life'))
 
 if __name__ == '__main__':
     unittest.main()
